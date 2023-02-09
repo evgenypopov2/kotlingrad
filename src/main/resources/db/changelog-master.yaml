@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: db/01_001_CREATE_TABLE_SERVICE.sql
