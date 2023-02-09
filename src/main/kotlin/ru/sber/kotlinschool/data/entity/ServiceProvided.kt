@@ -13,7 +13,7 @@ data class ServiceProvided(
     val id: Long,
     val name: String,
     val price: Int,
-    val capacity: Int,
+    var capacity: Int = 1,
     @Column(nullable = true)
     val duration: Int
 )
