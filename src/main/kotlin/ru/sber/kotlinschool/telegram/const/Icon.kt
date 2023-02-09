@@ -1,4 +1,4 @@
-package ru.sber.kotlinschool.const
+package ru.sber.kotlinschool.telegram.const
 
 import com.vdurmont.emoji.EmojiParser;
 

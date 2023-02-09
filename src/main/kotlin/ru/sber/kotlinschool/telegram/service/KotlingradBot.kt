@@ -1,4 +1,4 @@
-package ru.sber.kotlinschool.service
+package ru.sber.kotlinschool.telegram.service
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -7,7 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
-import ru.sber.kotlinschool.const.Icon
+import ru.sber.kotlinschool.telegram.const.Icon
 
 @Service
 class KotlingradBot: TelegramLongPollingBot()
