@@ -43,6 +43,19 @@
 			<artifactId>liquibase-core</artifactId>
 		</dependency>-->
 
+		<!-- Telegram-bot UI start	-->
+		<dependency>
+			<groupId>org.telegram</groupId>
+			<artifactId>telegrambots-spring-boot-starter</artifactId>
+			<version>5.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vdurmont</groupId>
+			<artifactId>emoji-java</artifactId>
+			<version>3.3.0</version>
+		</dependency>
+		<!-- Telegram-bot UI end	-->
+
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
