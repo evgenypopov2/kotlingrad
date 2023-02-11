@@ -14,7 +14,7 @@ class UserInfoAction: Action()
         val userInfo =  getUserInfo(Person(1L, "ФИО", "545345", "@53453454", PersonRole.CLIENT))
         val responseMessage = SendMessage(chatId, userInfo)
         responseMessage.enableMarkdown(true)
-        val list = currentStep.nextSteps.map { nextStep -> listOf(nextStep)}
+        val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}
 
         responseMessage.replyMarkup = getReplyMarkup(list)
 

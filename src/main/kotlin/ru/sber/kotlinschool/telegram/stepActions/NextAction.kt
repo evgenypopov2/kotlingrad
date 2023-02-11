@@ -10,7 +10,7 @@ class NextAction: Action()
     override fun execute(currentStep: Step, chatId: String): SendMessage {
         val responseMessage = SendMessage(chatId, currentStep.messageForUser)
         responseMessage.enableMarkdown(true)
-        val list = currentStep.nextSteps.map { nextStep -> listOf(nextStep)}
+        val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}
 
         responseMessage.replyMarkup = getReplyMarkup(list)
 
