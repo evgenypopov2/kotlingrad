@@ -13,7 +13,7 @@ class ScriptService {
 
     val adminScript = prepareScript("adminScript.json")
 
-    val timeRegex = Regex("[0-9]{2}:[0-9]{2}")
+    val timeRegex = Regex("[0-9]{1,2}:[0-9]{2}")
 
 //    val clientScript = getScript("clientScript.json")
 
@@ -30,11 +30,16 @@ class ScriptService {
         return script
     }
 
-    fun getCurrentStep(message: String): Step
+    fun getCurrentStep(message: String): Step?
     {
         if(message.contains(timeRegex))
            return adminScript.steps.single { it.title.contains("DATE_TIME_CALC") };
 
-        return adminScript.steps.single { it.title.split("|").contains(message) };
+        return adminScript.steps.singleOrNull() { it.title.split("|").contains(message) };
+    }
+
+    fun getFirstStep(): Step
+    {
+        return getCurrentStep("/start")!!
     }
 }
