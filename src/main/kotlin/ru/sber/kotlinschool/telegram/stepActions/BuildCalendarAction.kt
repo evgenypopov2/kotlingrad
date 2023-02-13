@@ -6,24 +6,24 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
 import ru.sber.kotlinschool.telegram.entity.Step
 
-@Component("DATE_TIME_CALC")
-class DateTimeCalculationAction : Action() {
+
+@Component("CREATE_CALENDAR")
+class BuildCalendarAction : Action() {
 
     override fun execute(currentStep: Step, chatId: String): SendMessage {
         val responseMessage = SendMessage(chatId, currentStep.messageForUser)
-        responseMessage.enableMarkdown(true)
-
-        val range = if (currentStep.configParams.isNotEmpty()) toRange(currentStep.configParams[0])
-        else toRange("9-18")
+        responseMessage.enableMarkdown(false)
 
         val inlineKeyboardMarkup = InlineKeyboardMarkup() //Создаем объект разметки клавиатуры
         val keyboardButtonsRow1: MutableList<InlineKeyboardButton> = ArrayList()
         val rowList: MutableList<List<InlineKeyboardButton>> = ArrayList() //Создаём ряд
 
-        for (i in range) {
+        val weekdays = listOf("Понедельник", "Вторник", "Среда", "Четверг", "Пятница")
+
+        weekdays.forEach {
             val inlineKeyboardButton1 = InlineKeyboardButton()
-            inlineKeyboardButton1.text = "${i}:00"
-            inlineKeyboardButton1.callbackData = "${i}:00"
+            inlineKeyboardButton1.text = it
+            inlineKeyboardButton1.callbackData = it
             keyboardButtonsRow1.add(inlineKeyboardButton1)
         }
 
@@ -35,8 +35,4 @@ class DateTimeCalculationAction : Action() {
 
         return responseMessage
     }
-
-    fun toRange(str: String): IntRange = str
-        .split("-")
-        .let { (a, b) -> a.toInt()..b.toInt() }
 }

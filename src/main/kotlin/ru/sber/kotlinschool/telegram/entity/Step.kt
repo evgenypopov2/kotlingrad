@@ -1,7 +1,6 @@
 package ru.sber.kotlinschool.telegram.entity
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import ru.sber.kotlinschool.telegram.ActionType
 
 class Step(
 
@@ -18,7 +17,10 @@ class Step(
     val nextStepId: List<Int>,
 
     @JsonProperty("actionOnStep")
-    val actionOnStep: ActionType
+    val actionOnStep: ActionType,
+
+    @JsonProperty("configParams")
+    val configParams: List<String>
 )
 {
     var parent: Step? = null

@@ -11,7 +11,7 @@ class UserInfoAction: Action()
 {
 
     override fun execute(currentStep: Step, chatId: String): SendMessage {
-        val userInfo =  getUserInfo(Person(1L, "ФИО", "545345", "@53453454", PersonRole.CLIENT))
+        val userInfo =  getUserInfo(Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT))
         val responseMessage = SendMessage(chatId, userInfo)
         responseMessage.enableMarkdown(true)
         val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}

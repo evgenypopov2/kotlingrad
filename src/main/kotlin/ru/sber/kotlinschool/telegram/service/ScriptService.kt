@@ -32,10 +32,17 @@ class ScriptService {
 
     fun getCurrentStep(message: String): Step?
     {
-        if(message.contains(timeRegex))
-           return adminScript.steps.single { it.title.contains("DATE_TIME_CALC") };
+        return adminScript.steps.singleOrNull() { it.title.contains(message) };
+    }
 
-        return adminScript.steps.singleOrNull() { it.title.split("|").contains(message) };
+    fun getCurrentStepById(id: Int): Step?
+    {
+        return adminScript.steps.singleOrNull() { it.id == id };
+    }
+
+    fun getCurrentStepByMessageForUser(message: String): Step?
+    {
+        return adminScript.steps.singleOrNull() { it.messageForUser.contains(message) };
     }
 
     fun getFirstStep(): Step
