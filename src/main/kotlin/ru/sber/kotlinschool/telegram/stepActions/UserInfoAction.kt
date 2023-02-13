@@ -7,14 +7,13 @@ import ru.sber.kotlinschool.data.entity.PersonRole
 import ru.sber.kotlinschool.telegram.entity.Step
 
 @Component("USER_INFO")
-class UserInfoAction: Action()
-{
+class UserInfoAction : Action() {
 
     override fun execute(currentStep: Step, chatId: String): SendMessage {
-        val userInfo =  getUserInfo(Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT))
+        val userInfo = getUserInfo(Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT))
         val responseMessage = SendMessage(chatId, userInfo)
         responseMessage.enableMarkdown(true)
-        val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}
+        val list = currentStep.children.map { nextStep -> listOf(nextStep.title) }
 
         responseMessage.replyMarkup = getReplyMarkup(list)
 
@@ -26,7 +25,7 @@ class UserInfoAction: Action()
         return "Информация по клиенту: \n" +
                 "\n" +
                 "Имя клиента: ${person.fio} \n" +
-                "Номер телефона: ${person.phone} \n"+
+                "Номер телефона: ${person.phone} \n" +
                 "Логин: ${person.tLogin} \n"
     }
 
