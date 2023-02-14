@@ -5,4 +5,4 @@ import org.springframework.stereotype.Repository
 import ru.sber.kotlinschool.data.entity.ServiceProvided
 
 @Repository
-interface ProvidedServiceRepository: JpaRepository<ServiceProvided, Long>
+interface ServiceProvidedRepository: JpaRepository<ServiceProvided, Long>
