@@ -1,6 +1,6 @@
 package ru.sber.kotlinschool.telegram.entity
 
-enum class ActionType {
+enum class StepType {
     NEXT,
     USER_INFO,
     DATE_TIME_CALC,

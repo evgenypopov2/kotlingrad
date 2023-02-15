@@ -5,9 +5,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
 import ru.sber.kotlinschool.telegram.entity.Step
 
-abstract class Action {
+abstract class StepBuilder {
 
-    abstract fun execute(currentStep: Step, chatId: String): SendMessage
+    abstract fun build(currentStep: Step, chatId: String): SendMessage
 
     fun getReplyMarkup(allButtons: List<List<String>>): ReplyKeyboardMarkup {
         val markup = ReplyKeyboardMarkup()

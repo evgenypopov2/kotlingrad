@@ -8,7 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import ru.sber.kotlinschool.telegram.entity.Step
 
 @Component("DATE_TIME_CALC")
-class DateTimeCalculationAction : Action() {
+class DateTimeCalculationStepBuilder : StepBuilder() {
 
     @Value("\${admin.startWorkinHour}")
     private val  start: String = ""
@@ -16,7 +16,7 @@ class DateTimeCalculationAction : Action() {
     @Value("\${admin.endWorkingHour}")
     private val  end: String = ""
 
-    override fun execute(currentStep: Step, chatId: String): SendMessage {
+    override fun build(currentStep: Step, chatId: String): SendMessage {
         val responseMessage = SendMessage(chatId, currentStep.messageForUser)
         responseMessage.enableMarkdown(true)
 

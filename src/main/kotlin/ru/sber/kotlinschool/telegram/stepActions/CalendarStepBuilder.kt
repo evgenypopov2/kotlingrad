@@ -8,9 +8,9 @@ import ru.sber.kotlinschool.telegram.entity.Step
 
 
 @Component("CREATE_CALENDAR")
-class BuildCalendarAction : Action() {
+class CalendarStepBuilder : StepBuilder() {
 
-    override fun execute(currentStep: Step, chatId: String): SendMessage {
+    override fun build(currentStep: Step, chatId: String): SendMessage {
         val responseMessage = SendMessage(chatId, currentStep.messageForUser)
         responseMessage.enableMarkdown(false)
 

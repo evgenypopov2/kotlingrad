@@ -7,7 +7,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
 import ru.sber.kotlinschool.telegram.entity.Step
-import ru.sber.kotlinschool.telegram.stepActions.Action
+import ru.sber.kotlinschool.telegram.stepActions.StepBuilder
 
 @Service
 class KotlingradBot : TelegramLongPollingBot() {
@@ -22,7 +22,7 @@ class KotlingradBot : TelegramLongPollingBot() {
     private lateinit var scriptService: ScriptService
 
     @Autowired
-    private val actionMap: Map<String, Action> = HashMap()
+    private val stepBuilderMap: Map<String, StepBuilder> = HashMap()
 
     @Autowired
     private lateinit var userState: UserState
@@ -56,7 +56,7 @@ class KotlingradBot : TelegramLongPollingBot() {
             else scriptService.getFirstStep()
 
             responseMessage =
-                actionMap[currentStep!!.actionOnStep.name]?.execute(currentStep, chatId.toString())!!;
+                stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
 
             userState.setState(chatId.toString(), currentStep.id)
         }
@@ -78,7 +78,7 @@ class KotlingradBot : TelegramLongPollingBot() {
             else scriptService.getFirstStep()
 
             responseMessage =
-                actionMap[currentStep!!.actionOnStep.name]?.execute(currentStep, chatId.toString())!!;
+                stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
 
             userState.setState(chatId.toString(), currentStep.id)
         }

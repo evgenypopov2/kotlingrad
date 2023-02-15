@@ -7,9 +7,9 @@ import ru.sber.kotlinschool.data.entity.PersonRole
 import ru.sber.kotlinschool.telegram.entity.Step
 
 @Component("USER_LINK")
-class UserLinkAction : Action() {
+class UserLinkStepBuilder : StepBuilder() {
 
-    override fun execute(currentStep: Step, chatId: String): SendMessage {
+    override fun build(currentStep: Step, chatId: String): SendMessage {
         val userMessage =  getUserMessage(Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT),
             currentStep.configParams)
         val responseMessage = SendMessage(chatId, userMessage)

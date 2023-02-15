@@ -16,8 +16,8 @@ class Step(
     @JsonProperty("nextStepId")
     val nextStepId: List<Int>,
 
-    @JsonProperty("actionOnStep")
-    val actionOnStep: ActionType,
+    @JsonProperty("stepType")
+    val stepType: StepType,
 
     @JsonProperty("configParams")
     val configParams: List<String>

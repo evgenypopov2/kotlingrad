@@ -7,9 +7,9 @@ import ru.sber.kotlinschool.data.entity.PersonRole
 import ru.sber.kotlinschool.telegram.entity.Step
 
 @Component("USER_INFO")
-class UserInfoAction : Action() {
+class UserInfoStepBuilder : StepBuilder() {
 
-    override fun execute(currentStep: Step, chatId: String): SendMessage {
+    override fun build(currentStep: Step, chatId: String): SendMessage {
         val userInfo = getUserInfo(Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT))
         val responseMessage = SendMessage(chatId, userInfo)
         responseMessage.enableMarkdown(true)

@@ -5,9 +5,9 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import ru.sber.kotlinschool.telegram.entity.Step
 
 @Component("NEXT")
-class NextAction: Action()
+class NextStepBuilder: StepBuilder()
 {
-    override fun execute(currentStep: Step, chatId: String): SendMessage {
+    override fun build(currentStep: Step, chatId: String): SendMessage {
         val responseMessage = SendMessage(chatId, currentStep.messageForUser)
         responseMessage.enableMarkdown(true)
         val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}
