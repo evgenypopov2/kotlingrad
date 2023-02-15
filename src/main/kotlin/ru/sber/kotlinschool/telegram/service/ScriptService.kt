@@ -32,7 +32,7 @@ class ScriptService {
 
     fun getCurrentStep(message: String): Step?
     {
-        return adminScript.steps.singleOrNull() { it.title.contains(message) };
+        return adminScript.steps.firstOrNull() { it.title.contains(message) };
     }
 
     fun getCurrentStepById(id: Int): Step?

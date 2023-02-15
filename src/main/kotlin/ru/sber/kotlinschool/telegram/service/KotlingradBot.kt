@@ -51,9 +51,12 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it) }
 
-            val currentStep: Step? = if (prevStep != null)
+            var currentStep: Step? = if (prevStep != null)
                 prevStep.children.singleOrNull() { it.title == messageText };
             else scriptService.getFirstStep()
+
+            if(currentStep == null)
+                currentStep = prevStep;
 
             responseMessage =
                 stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
