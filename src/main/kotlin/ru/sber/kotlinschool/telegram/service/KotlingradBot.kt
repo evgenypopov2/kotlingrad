@@ -47,9 +47,9 @@ class KotlingradBot : TelegramLongPollingBot() {
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
         if (message.hasText()) {
             val messageText = message.text
-            val prevStepId = userState.getState(chatId.toString())
+            val prevState = userState.getPrevStep(chatId.toString())
 
-            val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it) }
+            val prevStep: Step? = prevState?.let { scriptService.getCurrentStepById(it.stepId) }
 
             var currentStep: Step? = if (prevStep != null)
                 prevStep.children.singleOrNull() { it.title == messageText };
@@ -61,7 +61,7 @@ class KotlingradBot : TelegramLongPollingBot() {
             responseMessage =
                 stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
 
-            userState.setState(chatId.toString(), currentStep.id)
+            userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
         execute(responseMessage)
     }
@@ -72,9 +72,9 @@ class KotlingradBot : TelegramLongPollingBot() {
         val chatId = message.chatId
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
         if (message.hasText()) {
-            val prevStepId = userState.getState(chatId.toString())
+            val prevStepId = userState.getPrevStep(chatId.toString())
 
-            val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it) }
+            val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it.stepId) }
 
             val currentStep: Step? = if (prevStep != null)
                 prevStep.children[0]
@@ -83,7 +83,7 @@ class KotlingradBot : TelegramLongPollingBot() {
             responseMessage =
                 stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
 
-            userState.setState(chatId.toString(), currentStep.id)
+            userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
         execute(responseMessage)
     }

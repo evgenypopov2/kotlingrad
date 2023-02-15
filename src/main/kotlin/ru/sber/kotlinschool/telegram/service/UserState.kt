@@ -1,26 +1,34 @@
 package ru.sber.kotlinschool.telegram.service
 
 import org.springframework.stereotype.Component
+import ru.sber.kotlinschool.telegram.entity.UserParam
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class UserState {
 
-    private val userStates: MutableMap<String, String> = mutableMapOf<String, String>()
-    private val userStates2: MutableMap<String, Int> = mutableMapOf<String, Int>()
+    private val stepHistory: ConcurrentHashMap<String, State> = ConcurrentHashMap()
 
-//    fun setState(clientId:String, message:String)
-//    {
-//        userStates.put(clientId, message)
-//    }
-
-    fun setState(clientId:String, message:Int)
+    fun setCurrentStep(clientId:String, state:State)
     {
-        userStates2.put(clientId, message)
+        stepHistory[clientId]?.tmpParam?.let { state.tmpParam.putAll(it) }
+
+        stepHistory[clientId] = state
     }
 
-    fun getState(clientId:String): Int?
+    fun getPrevStep(clientId:String): State?
     {
-       return userStates2[clientId]
+       return stepHistory[clientId]
     }
 
+    fun updateTmpMap(chatId: String, param: UserParam, data: String) {
+        stepHistory[chatId]?.tmpParam?.set(param, data)
+    }
+
+    fun getTmpParam(chatId: String, param: UserParam):String?
+    {
+        return stepHistory[chatId]?.tmpParam?.get(param)
+    }
 }
+
+class State(val stepId: Int, val sendMessageText:String, val tmpParam: MutableMap<UserParam, String> = mutableMapOf()) {}

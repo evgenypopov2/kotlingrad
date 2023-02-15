@@ -1,17 +1,25 @@
 package ru.sber.kotlinschool.telegram.stepActions
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import ru.sber.kotlinschool.data.entity.Person
 import ru.sber.kotlinschool.data.entity.PersonRole
 import ru.sber.kotlinschool.telegram.entity.Step
+import ru.sber.kotlinschool.telegram.entity.UserParam
+import ru.sber.kotlinschool.telegram.service.UserState
 
 @Component("USER_LINK")
 class UserLinkStepBuilder : StepBuilder() {
 
+    @Autowired
+    private lateinit var userState: UserState
+
     override fun build(currentStep: Step, chatId: String): SendMessage {
-        val userMessage =  getUserMessage(Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT),
+        val userMessage =  getUserMessage(chatId,
+            Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT),
             currentStep.configParams)
+
         val responseMessage = SendMessage(chatId, userMessage)
         responseMessage.enableMarkdown(true)
         val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}
@@ -21,9 +29,12 @@ class UserLinkStepBuilder : StepBuilder() {
         return responseMessage
     }
 
-    fun getUserMessage(person: Person, msgType:List<String>): String //TODO
+    fun getUserMessage(chatId: String, person: Person, msgType:List<String>): String //TODO
     {
         val message = msgType.map { getMessageByType(person,it) }.joinToString("\n")
+
+        userState.updateTmpMap(chatId, UserParam.MESSAGE_FOR_USER,message)
+
         return "Отправить клиенту: \n" +
                 "${person.fio} с номером телефона ${person.phone} \n" +
                 "\n" +

@@ -76,8 +76,8 @@
     {
       "id": 18,
       "title": "Отправить",
-      "messageForUser": "Сообщение отправлено",
-      "nextStepId": [],
+      "messageForUser": "Сообщение отправлено пользователю",
+      "nextStepId": [21],
       "stepType": "CONNECT_WITH_USER",
       "configParams": []
     },
@@ -95,6 +95,14 @@
       "messageForUser": "",
       "nextStepId": [18],
       "stepType": "CONNECT_WITH_USER",
+      "configParams": []
+    },
+    {
+      "id": 21,
+      "title": "Вернутся в главное меню",
+      "messageForUser": "Вернутся в главное меню",
+      "nextStepId": [2, 3, 4],
+      "stepType": "NEXT",
       "configParams": []
     }
   ]
