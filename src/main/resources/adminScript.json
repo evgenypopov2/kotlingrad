@@ -1,0 +1,109 @@
+{
+  "startPoint": "/start",
+  "steps": [
+    {
+      "id": 1,
+      "title": "/start",
+      "messageForUser": "Добро пожаловать!",
+      "nextStepId": [2, 3, 4],
+      "stepType": "NEXT",
+      "configParams": []
+    },
+    {
+      "id": 2,
+      "title": "Мое расписание",
+      "messageForUser": "Выберите день недели для просмотра расписания",
+      "nextStepId": [13],
+      "stepType": "CREATE_CALENDAR",
+      "configParams": []
+    },
+    {
+      "id": 3,
+      "title": "Список клиентов",
+      "messageForUser": "Выберите клиента",
+      "nextStepId": [],
+      "stepType": "NEXT",
+      "configParams": []
+    },
+    {
+      "id": 4,
+      "title": "Рассчитать выручку",
+      "messageForUser": "Выберите за какой период хотите рассчитать",
+      "nextStepId": [],
+      "stepType": "NEXT",
+      "configParams": []
+    },
+    {
+      "id": 13,
+      "title": "",
+      "messageForUser": "Выберите время для просмотра расписания",
+      "nextStepId": [14],
+      "stepType": "DATE_TIME_CALC",
+      "configParams": []
+    },
+    {
+      "id": 14,
+      "title": "Информация по клиенту",
+      "messageForUser": "",
+      "nextStepId": [15,16,17],
+      "stepType": "USER_INFO",
+      "configParams": []
+    },
+    {
+      "id": 15,
+      "title": "Перенести запись",
+      "messageForUser": "Выберите день недели для переноса записи",
+      "nextStepId": [19],
+      "stepType": "CREATE_CALENDAR",
+      "configParams": []
+    },
+    {
+      "id": 16,
+      "title": "Отменить запись",
+      "messageForUser": "Выберите время для просмотра расписания",
+      "nextStepId": [20],
+      "stepType": "NEXT",
+      "configParams": []
+    },
+    {
+      "id": 17,
+      "title": "Связаться с клиентом",
+      "messageForUser": "Выберите время для просмотра расписания",
+      "nextStepId": [18],
+      "stepType": "USER_LINK",
+      "configParams": ["MOVE"]
+    },
+    {
+      "id": 18,
+      "title": "Отправить",
+      "messageForUser": "Сообщение отправлено пользователю",
+      "nextStepId": [21],
+      "stepType": "CONNECT_WITH_USER",
+      "configParams": []
+    },
+    {
+      "id": 19,
+      "title": "Мое расписание",
+      "messageForUser": "Выберите время для  переноса записи",
+      "nextStepId": [17],
+      "stepType": "DATE_TIME_CALC",
+      "configParams": ["9-18"]
+    },
+    {
+      "id": 20,
+      "title": "Связаться с клиентом",
+      "messageForUser": "",
+      "nextStepId": [18],
+      "stepType": "CONNECT_WITH_USER",
+      "configParams": []
+    },
+    {
+      "id": 21,
+      "title": "Вернутся в главное меню",
+      "messageForUser": "Вернутся в главное меню",
+      "nextStepId": [2, 3, 4],
+      "stepType": "NEXT",
+      "configParams": []
+    }
+  ]
+}
