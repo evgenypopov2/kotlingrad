@@ -6,5 +6,6 @@ enum class StepType {
     DATE_TIME_CALC,
     CREATE_CALENDAR,
     USER_LINK,
-    CONNECT_WITH_USER
+    CONNECT_WITH_USER,
+    EDIT_MSG
 }

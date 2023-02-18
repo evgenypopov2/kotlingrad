@@ -15,7 +15,8 @@
       "messageForUser": "Выберите день недели для просмотра расписания",
       "nextStepId": [13],
       "stepType": "CREATE_CALENDAR",
-      "configParams": []
+      "configParams": ["DATE_SCHEDULE"],
+      "executeAction": "SAVE_DATE"
     },
     {
       "id": 3,
@@ -39,7 +40,8 @@
       "messageForUser": "Выберите время для просмотра расписания",
       "nextStepId": [14],
       "stepType": "DATE_TIME_CALC",
-      "configParams": []
+      "configParams": ["TIME_SCHEDULE"],
+      "executeAction": "SAVE_DATE"
     },
     {
       "id": 14,
@@ -69,7 +71,7 @@
       "id": 17,
       "title": "Связаться с клиентом",
       "messageForUser": "Выберите время для просмотра расписания",
-      "nextStepId": [18],
+      "nextStepId": [18,22],
       "stepType": "USER_LINK",
       "configParams": ["MOVE"]
     },
@@ -104,6 +106,15 @@
       "nextStepId": [2, 3, 4],
       "stepType": "NEXT",
       "configParams": []
+    },
+    {
+      "id": 22,
+      "title": "Обновить сообщение для отправки",
+      "messageForUser": "Введите сообщение для отправки клиенту",
+      "nextStepId": [17],
+      "stepType": "EDIT_MSG",
+      "configParams": [],
+      "executeAction": "CHANGE_MSG"
     }
   ]
 }

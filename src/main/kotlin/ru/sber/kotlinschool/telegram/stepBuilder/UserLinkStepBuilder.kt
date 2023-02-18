@@ -1,4 +1,4 @@
-package ru.sber.kotlinschool.telegram.stepActions
+package ru.sber.kotlinschool.telegram.stepBuilder
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -16,24 +16,28 @@ class UserLinkStepBuilder : StepBuilder() {
     private lateinit var userState: UserState
 
     override fun build(currentStep: Step, chatId: String): SendMessage {
-        val userMessage =  getUserMessage(chatId,
+        val userMessage = getUserMessage(
+            chatId,
             Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT),
-            currentStep.configParams)
+            currentStep.configParams
+        )
 
         val responseMessage = SendMessage(chatId, userMessage)
         responseMessage.enableMarkdown(true)
-        val list = currentStep.children.map { nextStep -> listOf(nextStep.title)}
+        val list = currentStep.children.map { nextStep -> listOf(nextStep.title) }
 
         responseMessage.replyMarkup = getReplyMarkup(list)
 
         return responseMessage
     }
 
-    fun getUserMessage(chatId: String, person: Person, msgType:List<String>): String //TODO
+    fun getUserMessage(chatId: String, person: Person, msgType: List<String>): String //TODO
     {
-        val message = msgType.map { getMessageByType(person,it) }.joinToString("\n")
+        var message = userState.getTmpParam(chatId, UserParam.MESSAGE_FOR_USER)
+        if (message == null)
+            message = msgType.map { getMessageByType(person, it) }.joinToString("\n")
 
-        userState.updateTmpMap(chatId, UserParam.MESSAGE_FOR_USER,message)
+        userState.updateTmpMap(chatId, UserParam.MESSAGE_FOR_USER, message)
 
         return "Отправить клиенту: \n" +
                 "${person.fio} с номером телефона ${person.phone} \n" +
@@ -43,15 +47,15 @@ class UserLinkStepBuilder : StepBuilder() {
                 "\n";
     }
 
-    fun getMessageByType(person: Person,type: String): String{
-       return when (type) {
+    fun getMessageByType(person: Person, type: String): String {
+        return when (type) {
             "MOVE" -> moveMessage(person)
             "DECLINE" -> declineMessage(person)
             else -> defaultMessage(person)
         }
     }
 
-    fun moveMessage (person: Person): String {
+    fun moveMessage(person: Person): String {
         val revervationDate = "13.02.23" //TODO брать из базы
         val availableDate = "13.02.23" //TODO брать из базы
         val availableTime = "15:30" //TODO брать из базы
