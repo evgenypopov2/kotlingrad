@@ -6,23 +6,30 @@ import java.time.LocalTime
 import javax.persistence.*
 
 @Entity
-@Table(uniqueConstraints = arrayOf(
-    UniqueConstraint(name = "schedule_un", columnNames = arrayOf("customer_telegram_id", "service_id", "service_date", "service_time"))
-))
+@Table
 data class ServiceSchedule(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long,
-    @Column(name = "ins_date", nullable = false, columnDefinition = "timestamp with time zone DEFAULT CURRENT_TIMESTAMP")
+    val id: Long? = null,
+    @Column(
+        name = "ins_date",
+        nullable = false,
+        columnDefinition = "timestamp with time zone DEFAULT CURRENT_TIMESTAMP"
+    )
     val insDate: LocalDateTime = LocalDateTime.now(),
-    @OneToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "customer_id")
     val customer: Person,
-    @OneToOne(cascade = [CascadeType.ALL])
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "service_id")
     val service: ServiceProvided,
     @Column(name = "service_date", nullable = false, columnDefinition = "date")
     val date: LocalDate,
     @Column(name = "service_time", nullable = false)
     val time: LocalTime,
     @Column(name = "is_visited", nullable = false, columnDefinition = "boolean DEFAULT false")
-    val isVisited: Boolean
+    val isVisited: Boolean,
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "executor_id")
+    val executor: Person
 )

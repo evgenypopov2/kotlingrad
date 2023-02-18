@@ -3,9 +3,7 @@ package ru.sber.kotlinschool.data.entity
 import javax.persistence.*
 
 @Entity
-@Table(uniqueConstraints = arrayOf(
-    UniqueConstraint(name = "service_name_un", columnNames = arrayOf("name", "executor_telegram_id"))
-))
+@Table
 data class ServiceProvided(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,6 +16,6 @@ data class ServiceProvided(
     var capacity: Int = 1,
     @Column(nullable = false, columnDefinition = "bigint default 0")
     val price: Int = 0,
-    @OneToOne(cascade = [CascadeType.ALL])
-    val executor: Person
+    @OneToMany(mappedBy = "", cascade = [CascadeType.ALL])
+    val serviceProvidedSchedules: MutableList<ServiceSchedule> = mutableListOf()
 )
