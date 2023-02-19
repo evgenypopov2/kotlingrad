@@ -1,2 +1,5 @@
-insert into person (fio, t_login, phone, `role`) VALUES ('Хозяин', 'admin', '+79007654321', 'ADMIN'),('Клиент1', 'client1', '+79001234567', 'CLIENT');
-insert into service_provided (`name`, price, capacity) values ('Стрижка', 1000, 1),('Маникюр', 1500, 1),('Солярий', 500, 2)
+insert into PERSON (TELEGRAM_ID, FIO, PHONE, ROLE, FIRST_NAME) values (920478663, 'Иванов Андрей', '+79296268859', 'ADMIN', 'Sir Hanry'), (920478655, 'Сидоров Иван', '+79296268324', 'CLIENT', 'Sir Sidor'), (924478601, 'Петров Сергей', '+79246265839', 'ADMIN', 'Sir Petroff'), (926478523, 'Тихонов Петр', '+79245465840', 'CLIENT', 'Sir Tihon');
+
+insert into SERVICE_PROVIDED (id, NAME, DURATION, CAPACITY, PRICE, executor_telegram_id) values (1, 'Стрижка', 60, 1, 100000, 920478663), (2, 'Маникюр', 60, 1, 150000, 920478663), (3, 'Солярий', 60, 2, 50000, 920478663), (4, 'Мойка авто', 60, 1, 70000, 924478601), (5, 'Переборка двигателя', 60, 1, 700000, 924478601);
+
+insert into service_schedule (id, customer_telegram_id, SERVICE_ID, SERVICE_DATE, SERVICE_TIME, is_visited) values (1, 920478663, 4, date '2023-02-21', TIME '08:00:00', false), (2, 920478663, 5, date '2023-02-21', TIME '09:00:00', false),  (3, 920478655, 1, date '2023-02-21', TIME '08:00:00', false), (4, 920478655, 3, date '2023-02-23', TIME '09:00:00', false),(5, 920478663, 1, date '2023-02-23', TIME '10:00:00', false), (6, 926478523, 1, date '2023-02-25', TIME '08:00:00', true);

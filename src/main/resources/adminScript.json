@@ -13,7 +13,7 @@
       "id": 2,
       "title": "Мое расписание",
       "messageForUser": "Выберите день недели для просмотра расписания",
-      "nextStepId": [13],
+      "nextStepId": [50],
       "stepType": "CREATE_CALENDAR",
       "configParams": ["DATE_SCHEDULE"],
       "executeAction": "SAVE_DATE"
@@ -85,7 +85,7 @@
     },
     {
       "id": 21,
-      "title": "Вернутся в главное меню",
+      "title": "Вернуться в главное меню",
       "messageForUser": "Вернутся в главное меню",
       "nextStepId": [2, 30, 40],
       "stepType": "NEXT",
@@ -180,6 +180,14 @@
       "messageForUser": "Введите период в формате {дд.мм.гггг-дд.мм.гггг}",
       "nextStepId": [21],
       "stepType": "PROFIT_CALC",
+      "configParams": []
+    },
+    {
+      "id": 50,
+      "title": "",
+      "messageForUser": "Выберите время для просмотра расписания",
+      "nextStepId": [14],
+      "stepType": "ADMIN_DAY_SCHEDULE",
       "configParams": []
     }
   ]

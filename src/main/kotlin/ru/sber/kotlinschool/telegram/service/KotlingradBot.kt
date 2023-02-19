@@ -9,11 +9,14 @@ import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove
 import ru.sber.kotlinschool.telegram.entity.Step
+import ru.sber.kotlinschool.telegram.entity.UserParam
 import ru.sber.kotlinschool.telegram.stepAction.ActionExecutor
 import ru.sber.kotlinschool.telegram.stepBuilder.StepBuilder
 
 @Service
 class KotlingradBot : TelegramLongPollingBot() {
+
+    //private val logger = LoggerFactory.getLogger(KotlingradBot::class.java)
 
     @Value("\${bot.name}")
     private val botName: String = ""
@@ -48,6 +51,7 @@ class KotlingradBot : TelegramLongPollingBot() {
     }
 
     fun executeResponseForMessage(update: Update) {
+
         val message = update.message
         val chatId = message.chatId
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
@@ -61,20 +65,20 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             if(prevStep!=null && prevStep.executeAction?.isNotBlank() == true)
             {
-                currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, messageText, chatId.toString());
+                currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, messageText, chatId.toString())
             }
 
             if(currentStep == null) {
                 currentStep = if (prevStep != null)
-                    prevStep.children.singleOrNull() { it.title == messageText };
+                    prevStep.children.singleOrNull() { it.title == messageText }
                 else scriptService.getFirstStep()
             }
 
             if(currentStep == null)
-                currentStep = prevStep;
+                currentStep = prevStep
 
             responseMessage =
-                stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
+                stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!
 
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
@@ -88,9 +92,11 @@ class KotlingradBot : TelegramLongPollingBot() {
     }
 
     fun executeResponseForReply(update: Update) {
+
         val callback = update.callbackQuery
         val message = callback.message
         val chatId = message.chatId
+
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
         if (message.hasText()) {
             val prevStepId = userState.getPrevStep(chatId.toString())
@@ -101,7 +107,7 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             if(prevStep!=null && prevStep.executeAction?.isNotBlank() == true)
             {
-                currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, callback.data, chatId.toString());
+                currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, callback.data, chatId.toString())
             }
 
             if(currentStep==null) {
@@ -110,8 +116,10 @@ class KotlingradBot : TelegramLongPollingBot() {
                 else scriptService.getFirstStep()
             }
 
+            userState.updateTmpMap(chatId.toString(), UserParam.CALLBACK_DATA, callback.data)
+
             responseMessage =
-                stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
+                stepBuilderMap[currentStep.stepType.name]?.build(currentStep, chatId.toString())!!
 
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
