@@ -29,6 +29,11 @@ class UserState {
     {
         return stepHistory[chatId]?.tmpParam?.get(param)
     }
+
+    fun cleanHistory(chatId: String)
+    {
+        stepHistory.remove(chatId)
+    }
 }
 
 class State(val stepId: Int, val sendMessageText:String, val tmpParam: MutableMap<UserParam, String> = mutableMapOf()) {}

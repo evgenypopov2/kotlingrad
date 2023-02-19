@@ -1,4 +1,4 @@
-package ru.sber.kotlinschool.telegram.stepActions
+package ru.sber.kotlinschool.telegram.stepBuilder
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup

@@ -1,10 +1,9 @@
-package ru.sber.kotlinschool.telegram.stepActions
+package ru.sber.kotlinschool.telegram.stepBuilder
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import ru.sber.kotlinschool.telegram.entity.Step
 import ru.sber.kotlinschool.telegram.entity.UserParam
 import ru.sber.kotlinschool.telegram.service.UserState
@@ -25,7 +24,7 @@ class UserConnectStepBuilder : StepBuilder()
 
     override fun build(currentStep: Step, chatId: String): SendMessage
     {
-        val CHAT_ID = "" // TODO get from DB Что бы протестировать возьми свой из полученного  Update
+        val CHAT_ID = "151760076" // TODO get from DB Что бы протестировать возьми свой из полученного  Update
 
         val message = userState.getTmpParam(chatId, UserParam.MESSAGE_FOR_USER)
 

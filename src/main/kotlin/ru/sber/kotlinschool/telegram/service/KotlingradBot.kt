@@ -6,8 +6,11 @@ import org.springframework.stereotype.Service
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove
 import ru.sber.kotlinschool.telegram.entity.Step
-import ru.sber.kotlinschool.telegram.stepActions.StepBuilder
+import ru.sber.kotlinschool.telegram.stepAction.ActionExecutor
+import ru.sber.kotlinschool.telegram.stepBuilder.StepBuilder
 
 @Service
 class KotlingradBot : TelegramLongPollingBot() {
@@ -23,6 +26,9 @@ class KotlingradBot : TelegramLongPollingBot() {
 
     @Autowired
     private val stepBuilderMap: Map<String, StepBuilder> = HashMap()
+
+    @Autowired
+    private val actionExecutorMap: Map<String, ActionExecutor> = HashMap()
 
     @Autowired
     private lateinit var userState: UserState
@@ -51,9 +57,18 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             val prevStep: Step? = prevState?.let { scriptService.getCurrentStepById(it.stepId) }
 
-            var currentStep: Step? = if (prevStep != null)
-                prevStep.children.singleOrNull() { it.title == messageText };
-            else scriptService.getFirstStep()
+            var currentStep: Step? = null
+
+            if(prevStep!=null && prevStep.executeAction?.isNotBlank() == true)
+            {
+                currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, messageText, chatId.toString());
+            }
+
+            if(currentStep == null) {
+                currentStep = if (prevStep != null)
+                    prevStep.children.singleOrNull() { it.title == messageText };
+                else scriptService.getFirstStep()
+            }
 
             if(currentStep == null)
                 currentStep = prevStep;
@@ -63,6 +78,12 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
+
+        if(responseMessage.replyMarkup is InlineKeyboardMarkup)
+        {
+            cleanReplyKeyBoard(chatId.toString())
+        }
+
         execute(responseMessage)
     }
 
@@ -76,9 +97,18 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it.stepId) }
 
-            val currentStep: Step? = if (prevStep != null)
+            var currentStep: Step? = null
+
+            if(prevStep!=null && prevStep.executeAction?.isNotBlank() == true)
+            {
+                currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, callback.data, chatId.toString());
+            }
+
+            if(currentStep==null) {
+                currentStep = if (prevStep != null)
                 prevStep.children[0]
-            else scriptService.getFirstStep()
+                else scriptService.getFirstStep()
+            }
 
             responseMessage =
                 stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!;
@@ -86,5 +116,14 @@ class KotlingradBot : TelegramLongPollingBot() {
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
         execute(responseMessage)
+    }
+
+    fun cleanReplyKeyBoard(chatId: String)
+    {
+        val emptyMsg = SendMessage(chatId, "Выберите из меню сообщения")
+        val removeKeyBoard = ReplyKeyboardRemove()
+        removeKeyBoard.removeKeyboard = true
+        emptyMsg.replyMarkup = removeKeyBoard
+        execute(emptyMsg)
     }
 }

@@ -1,4 +1,4 @@
-package ru.sber.kotlinschool.telegram.stepActions
+package ru.sber.kotlinschool.telegram.stepBuilder
 
 import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
