@@ -4,13 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
+import org.telegram.telegrambots.meta.api.methods.ParseMode
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove
 import ru.sber.kotlinschool.telegram.entity.Step
 import ru.sber.kotlinschool.telegram.stepAction.ActionExecutor
 import ru.sber.kotlinschool.telegram.stepBuilder.StepBuilder
+
 
 @Service
 class KotlingradBot : TelegramLongPollingBot() {
@@ -93,6 +98,9 @@ class KotlingradBot : TelegramLongPollingBot() {
         val chatId = message.chatId
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
         if (message.hasText()) {
+
+            editMsgReply(callback)
+
             val prevStepId = userState.getPrevStep(chatId.toString())
 
             val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it.stepId) }
@@ -125,5 +133,20 @@ class KotlingradBot : TelegramLongPollingBot() {
         removeKeyBoard.removeKeyboard = true
         emptyMsg.replyMarkup = removeKeyBoard
         execute(emptyMsg)
+    }
+
+    fun editMsgReply(callback: CallbackQuery)
+    {
+        val editMessageReplyMarkup = EditMessageReplyMarkup()
+        editMessageReplyMarkup.chatId = callback.from.id.toString()
+        editMessageReplyMarkup.messageId = callback.message.messageId
+        execute(editMessageReplyMarkup)
+
+        val editMessageText = EditMessageText()
+        editMessageText.chatId = callback.from.id.toString()
+        editMessageText.messageId = callback.message.messageId
+        editMessageText.text = "Выбрано значение ${callback.data}"
+        execute(editMessageText)
+        editMessageText.parseMode = ParseMode.HTML
     }
 }

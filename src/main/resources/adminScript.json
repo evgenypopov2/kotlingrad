@@ -41,7 +41,8 @@
       "messageForUser": "Выберите день недели для переноса записи",
       "nextStepId": [19],
       "stepType": "CREATE_CALENDAR",
-      "configParams": []
+      "configParams": ["DATE_SCHEDULE"],
+      "executeAction": "SAVE_DATE"
     },
     {
       "id": 16,
@@ -73,7 +74,9 @@
       "messageForUser": "Выберите время для  переноса записи",
       "nextStepId": [17],
       "stepType": "DATE_TIME_CALC",
-      "configParams": ["9-18"]
+      "configParams": ["TIME_SCHEDULE"],
+      "executeAction": "SAVE_DATE"
+
     },
     {
       "id": 20,
