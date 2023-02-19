@@ -7,5 +7,8 @@ enum class StepType {
     CREATE_CALENDAR,
     USER_LINK,
     CONNECT_WITH_USER,
-    EDIT_MSG
+    EDIT_MSG,
+    INPUT,
+    CLIENT_LIST,
+    USER_TGM_LINK
 }

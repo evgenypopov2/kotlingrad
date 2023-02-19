@@ -5,7 +5,7 @@
       "id": 1,
       "title": "/start",
       "messageForUser": "Добро пожаловать!",
-      "nextStepId": [2, 3, 4],
+      "nextStepId": [2, 30, 4],
       "stepType": "NEXT",
       "configParams": []
     },
@@ -17,14 +17,6 @@
       "stepType": "CREATE_CALENDAR",
       "configParams": ["DATE_SCHEDULE"],
       "executeAction": "SAVE_DATE"
-    },
-    {
-      "id": 3,
-      "title": "Список клиентов",
-      "messageForUser": "Выберите клиента",
-      "nextStepId": [],
-      "stepType": "NEXT",
-      "configParams": []
     },
     {
       "id": 4,
@@ -47,7 +39,7 @@
       "id": 14,
       "title": "Информация по клиенту",
       "messageForUser": "",
-      "nextStepId": [15,16,17, 21],
+      "nextStepId": [15,16,23, 21],
       "stepType": "USER_INFO",
       "configParams": []
     },
@@ -63,13 +55,13 @@
       "id": 16,
       "title": "Отменить запись",
       "messageForUser": "Выберите время для просмотра расписания",
-      "nextStepId": [20],
-      "stepType": "NEXT",
-      "configParams": []
+      "nextStepId": [18,22,21],
+      "stepType": "USER_LINK",
+      "configParams": ["DECLINE"]
     },
     {
       "id": 17,
-      "title": "Связаться с клиентом",
+      "title": "Отправить сообщение клиенту",
       "messageForUser": "Выберите время для просмотра расписания",
       "nextStepId": [18,22,21],
       "stepType": "USER_LINK",
@@ -103,7 +95,7 @@
       "id": 21,
       "title": "Вернутся в главное меню",
       "messageForUser": "Вернутся в главное меню",
-      "nextStepId": [2, 3, 4],
+      "nextStepId": [2, 30, 4],
       "stepType": "NEXT",
       "configParams": ["CLEAR_HISTORY"]
     },
@@ -115,6 +107,47 @@
       "stepType": "EDIT_MSG",
       "configParams": [],
       "executeAction": "CHANGE_MSG"
+    },
+    {
+      "id": 23,
+      "title": "Связаться с клиентом",
+      "messageForUser": "",
+      "nextStepId": [21],
+      "stepType": "USER_TGM_LINK",
+      "configParams": []
+    },
+    {
+      "id": 30,
+      "title": "Список клиентов",
+      "messageForUser": "Выберите поиск",
+      "nextStepId": [31,32, 21],
+      "stepType": "NEXT",
+      "configParams": []
+    },
+    {
+      "id": 31,
+      "title": "Поиск по ФИО",
+      "messageForUser": "Введите ФИО клиента",
+      "nextStepId": [33],
+      "stepType": "EDIT_MSG",
+      "configParams": ["USER_FIO"],
+      "executeAction": "INPUT"
+    },
+    {
+      "id": 32,
+      "title": "Весь список",
+      "messageForUser": "Список клиентов:",
+      "nextStepId": [21],
+      "stepType": "CLIENT_LIST",
+      "configParams": []
+    },
+    {
+      "id": 33,
+      "title": "",
+      "messageForUser": "Список клиентов",
+      "nextStepId": [21],
+      "stepType": "CLIENT_LIST",
+      "configParams": ["USER_FIO"]
     }
   ]
 }
