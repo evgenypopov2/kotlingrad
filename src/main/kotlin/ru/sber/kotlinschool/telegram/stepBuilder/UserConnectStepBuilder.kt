@@ -24,7 +24,7 @@ class UserConnectStepBuilder : StepBuilder()
 
     override fun build(currentStep: Step, chatId: String): SendMessage
     {
-        val CHAT_ID = "" // TODO get from DB Что бы протестировать возьми свой из полученного  Update
+        val CHAT_ID = "151760076" // TODO get from DB Что бы протестировать возьми свой из полученного  Update
 
         val message = userState.getTmpParam(chatId, UserParam.MESSAGE_FOR_USER)
 

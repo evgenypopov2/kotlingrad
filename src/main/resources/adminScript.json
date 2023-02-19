@@ -5,7 +5,7 @@
       "id": 1,
       "title": "/start",
       "messageForUser": "Добро пожаловать!",
-      "nextStepId": [2, 30, 4],
+      "nextStepId": [2, 30, 40],
       "stepType": "NEXT",
       "configParams": []
     },
@@ -17,14 +17,6 @@
       "stepType": "CREATE_CALENDAR",
       "configParams": ["DATE_SCHEDULE"],
       "executeAction": "SAVE_DATE"
-    },
-    {
-      "id": 4,
-      "title": "Рассчитать выручку",
-      "messageForUser": "Выберите за какой период хотите рассчитать",
-      "nextStepId": [],
-      "stepType": "NEXT",
-      "configParams": []
     },
     {
       "id": 13,
@@ -95,7 +87,7 @@
       "id": 21,
       "title": "Вернутся в главное меню",
       "messageForUser": "Вернутся в главное меню",
-      "nextStepId": [2, 30, 4],
+      "nextStepId": [2, 30, 40],
       "stepType": "NEXT",
       "configParams": ["CLEAR_HISTORY"]
     },
@@ -148,6 +140,47 @@
       "nextStepId": [21],
       "stepType": "CLIENT_LIST",
       "configParams": ["USER_FIO"]
+    },
+    {
+      "id": 40,
+      "title": "Рассчитать выручку",
+      "messageForUser": "Выберите за какой период хотите рассчитать",
+      "nextStepId": [41,42,43],
+      "stepType": "NEXT",
+      "configParams": []
+    },
+    {
+      "id": 41,
+      "title": "Месяц",
+      "messageForUser": "",
+      "nextStepId": [21],
+      "stepType": "PROFIT_CALC",
+      "configParams": ["MONTH"]
+    },
+    {
+      "id": 42,
+      "title": "Неделя",
+      "messageForUser": "Выберите за какой период хотите рассчитать",
+      "nextStepId": [21],
+      "stepType": "PROFIT_CALC",
+      "configParams": ["WEEK"]
+    },
+    {
+      "id": 43,
+      "title": "Указанный период",
+      "messageForUser": "Введите период в формате {дд.мм.гггг-дд.мм.гггг}",
+      "nextStepId": [44],
+      "stepType": "EDIT_MSG",
+      "configParams": ["PERIOD"],
+      "executeAction": "INPUT"
+    },
+    {
+      "id": 44,
+      "title": "Рассчитать",
+      "messageForUser": "Введите период в формате {дд.мм.гггг-дд.мм.гггг}",
+      "nextStepId": [21],
+      "stepType": "PROFIT_CALC",
+      "configParams": []
     }
   ]
 }

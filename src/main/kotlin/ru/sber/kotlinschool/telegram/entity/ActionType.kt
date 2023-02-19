@@ -10,5 +10,7 @@ enum class StepType {
     EDIT_MSG,
     INPUT,
     CLIENT_LIST,
-    USER_TGM_LINK
+    USER_TGM_LINK,
+    PROFIT_CALC,
+    PERIOD
 }
