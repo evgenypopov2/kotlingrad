@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Update
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove
 import ru.sber.kotlinschool.telegram.entity.Step
 import ru.sber.kotlinschool.telegram.stepAction.ActionExecutor
 import ru.sber.kotlinschool.telegram.stepBuilder.StepBuilder
@@ -76,6 +78,12 @@ class KotlingradBot : TelegramLongPollingBot() {
 
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
+
+        if(responseMessage.replyMarkup is InlineKeyboardMarkup)
+        {
+            cleanReplyKeyBoard(chatId.toString())
+        }
+
         execute(responseMessage)
     }
 
@@ -108,5 +116,14 @@ class KotlingradBot : TelegramLongPollingBot() {
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
         execute(responseMessage)
+    }
+
+    fun cleanReplyKeyBoard(chatId: String)
+    {
+        val emptyMsg = SendMessage(chatId, "Выберите из меню сообщения")
+        val removeKeyBoard = ReplyKeyboardRemove()
+        removeKeyBoard.removeKeyboard = true
+        emptyMsg.replyMarkup = removeKeyBoard
+        execute(emptyMsg)
     }
 }

@@ -47,7 +47,7 @@
       "id": 14,
       "title": "Информация по клиенту",
       "messageForUser": "",
-      "nextStepId": [15,16,17],
+      "nextStepId": [15,16,17, 21],
       "stepType": "USER_INFO",
       "configParams": []
     },
@@ -71,7 +71,7 @@
       "id": 17,
       "title": "Связаться с клиентом",
       "messageForUser": "Выберите время для просмотра расписания",
-      "nextStepId": [18,22],
+      "nextStepId": [18,22,21],
       "stepType": "USER_LINK",
       "configParams": ["MOVE"]
     },
@@ -105,7 +105,7 @@
       "messageForUser": "Вернутся в главное меню",
       "nextStepId": [2, 3, 4],
       "stepType": "NEXT",
-      "configParams": []
+      "configParams": ["CLEAR_HISTORY"]
     },
     {
       "id": 22,
