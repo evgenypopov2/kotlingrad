@@ -35,7 +35,7 @@ class UserLinkStepBuilder : StepBuilder() {
     {
         var message = userState.getTmpParam(chatId, UserParam.MESSAGE_FOR_USER)
         if (message == null)
-            message = msgType.map { getMessageByType(person, it) }.joinToString("\n")
+            message = msgType.map { getMessageByType(chatId,person, it) }.joinToString("\n")
 
         userState.updateTmpMap(chatId, UserParam.MESSAGE_FOR_USER, message)
 
@@ -47,25 +47,25 @@ class UserLinkStepBuilder : StepBuilder() {
                 "\n";
     }
 
-    fun getMessageByType(person: Person, type: String): String {
+    fun getMessageByType(chatId:String,person: Person, type: String): String {
         return when (type) {
-            "MOVE" -> moveMessage(person)
+            "MOVE" -> moveMessage(chatId,person)
             "DECLINE" -> declineMessage(person)
             else -> defaultMessage(person)
         }
     }
 
-    fun moveMessage(person: Person): String {
+    fun moveMessage(chatId:String, person: Person): String {
         val revervationDate = "13.02.23" //TODO брать из базы
-        val availableDate = "13.02.23" //TODO брать из базы
-        val availableTime = "15:30" //TODO брать из базы
-        return "Привет, ${person.fio}! Не cмогу тебя принять ${revervationDate}.\n " +
+        val availableDate = userState.getTmpParam(chatId, UserParam.DATE_SCHEDULE) //TODO брать из базы
+        val availableTime = userState.getTmpParam(chatId, UserParam.TIME_SCHEDULE) //TODO брать из базы
+        return "Привет, ${person.fio}! Не смогу тебя принять ${revervationDate}.\n " +
                 "Перенесем запись на ${availableDate} в ${availableTime}? "
     }
 
     fun declineMessage(person: Person): String {
         val revervationDate = "13.02.23" //TODO брать из базы
-        return "Привет, ${person.fio}! Не cмогу тебя принять ${revervationDate}.\n " +
+        return "Привет, ${person.fio}! Не смогу тебя принять ${revervationDate}.\n " +
                 "Свяжусь с тобой через пару дней для переноса записи:)"
     }
 
