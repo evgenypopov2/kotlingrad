@@ -9,19 +9,36 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery
+import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow
+import ru.sber.kotlinschool.data.entity.Person
+import ru.sber.kotlinschool.data.entity.PersonRole
+import ru.sber.kotlinschool.data.service.PersonService
+import ru.sber.kotlinschool.data.service.ServiceProvidedService
+import ru.sber.kotlinschool.data.service.ServiceRegistrationService
+import ru.sber.kotlinschool.telegram.const.Icon
 import ru.sber.kotlinschool.telegram.entity.Step
 import ru.sber.kotlinschool.telegram.entity.UserParam
 import ru.sber.kotlinschool.telegram.stepAction.ActionExecutor
 import ru.sber.kotlinschool.telegram.stepBuilder.StepBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
+import java.util.*
 
 
 @Service
-class KotlingradBot : TelegramLongPollingBot() {
-
-    //private val logger = LoggerFactory.getLogger(KotlingradBot::class.java)
+class KotlingradBot(
+    private val personService: PersonService,
+    private val processService: ProcessService,
+    private val serviceProvidedService: ServiceProvidedService,
+    private val serviceRegistrationService: ServiceRegistrationService
+) : TelegramLongPollingBot() {
 
     @Value("\${bot.name}")
     private val botName: String = ""
@@ -29,8 +46,17 @@ class KotlingradBot : TelegramLongPollingBot() {
     @Value("\${bot.token}")
     private val token: String = ""
 
+    @Value("\${bot.about.for-client}")
+    private val aboutBotForClient: String = ""
+
+    @Value("\${bot.about.master}")
+    private val aboutMaster: String = ""
+
     @Autowired
     private lateinit var scriptService: ScriptService
+
+    @Autowired
+    private lateinit var userState: UserState
 
     @Autowired
     private val stepBuilderMap: Map<String, StepBuilder> = HashMap()
@@ -38,8 +64,10 @@ class KotlingradBot : TelegramLongPollingBot() {
     @Autowired
     private val actionExecutorMap: Map<String, ActionExecutor> = HashMap()
 
-    @Autowired
-    private lateinit var userState: UserState
+    private val updateHandlers: Map<String, (Update) -> Unit> = mapOf(
+        Pair(PersonRole.ADMIN.name) { update: Update -> adminUpdateHandler(update) },
+        Pair(PersonRole.CLIENT.name) { update: Update -> clientUpdateHandler(update) },
+   )
 
     override fun getBotUsername(): String = botName
 
@@ -47,11 +75,30 @@ class KotlingradBot : TelegramLongPollingBot() {
 
     override fun onUpdateReceived(update: Update?) {
         if (update != null) {
-            if (update.hasMessage()) {
-                executeResponseForMessage(update)
-            } else if (update.hasCallbackQuery()) {
-                executeResponseForReply(update)
-            }
+            updateHandlers[determineUserRole(update).name]?.invoke(update)
+        }
+    }
+
+    private fun determineUserRole(update: Update): PersonRole =
+        if (!update.hasMessage()) {
+            PersonRole.ADMIN
+        } else {
+            val message = update.message
+            val userId = message.chatId
+
+            val user = if (userId != null)
+                personService.findById(userId).orElseGet { personService.save(newUserFromMessage(message)) }
+            else
+                defaultUser()
+
+            user.role
+        }
+
+    private fun adminUpdateHandler(update: Update) {
+        if (update.hasMessage()) {
+            executeResponseForMessage(update)
+        } else if (update.hasCallbackQuery()) {
+            executeResponseForReply(update)
         }
     }
 
@@ -60,16 +107,14 @@ class KotlingradBot : TelegramLongPollingBot() {
         val message = update.message
         val chatId = message.chatId
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
+
         if (message.hasText()) {
             val messageText = message.text
             val prevState = userState.getPrevStep(chatId.toString())
-
             val prevStep: Step? = prevState?.let { scriptService.getCurrentStepById(it.stepId) }
-
             var currentStep: Step? = null
 
-            if(prevStep!=null && prevStep.executeAction?.isNotBlank() == true)
-            {
+            if(prevStep != null && prevStep.executeAction?.isNotBlank() == true) {
                 currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, messageText, chatId.toString())
             }
 
@@ -79,20 +124,17 @@ class KotlingradBot : TelegramLongPollingBot() {
                 else scriptService.getFirstStep()
             }
 
-            if(currentStep == null)
+            if(currentStep == null) {
                 currentStep = prevStep
+            }
 
-            responseMessage =
-                stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!
-
+            responseMessage = stepBuilderMap[currentStep!!.stepType.name]?.build(currentStep, chatId.toString())!!
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
 
-        if(responseMessage.replyMarkup is InlineKeyboardMarkup)
-        {
+        if(responseMessage.replyMarkup is InlineKeyboardMarkup) {
             cleanReplyKeyBoard(chatId.toString())
         }
-
         execute(responseMessage)
     }
 
@@ -101,34 +143,29 @@ class KotlingradBot : TelegramLongPollingBot() {
         val callback = update.callbackQuery
         val message = callback.message
         val chatId = message.chatId
-
         var responseMessage = SendMessage(chatId.toString(), "Я понимаю только текст") //TODO обработка ошибки
+
         if (message.hasText()) {
 
             editMsgReply(callback)
 
             val prevStepId = userState.getPrevStep(chatId.toString())
-
             val prevStep: Step? = prevStepId?.let { scriptService.getCurrentStepById(it.stepId) }
-
             var currentStep: Step? = null
 
-            if(prevStep!=null && prevStep.executeAction?.isNotBlank() == true)
-            {
+            if(prevStep != null && prevStep.executeAction?.isNotBlank() == true) {
                 currentStep = actionExecutorMap[prevStep.executeAction]?.execute(prevStep, callback.data, chatId.toString())
             }
 
-            if(currentStep==null) {
+            if(currentStep == null) {
                 currentStep = if (prevStep != null)
-                prevStep.children[0]
-                else scriptService.getFirstStep()
+                    prevStep.children[0]
+                else
+                    scriptService.getFirstStep()
             }
 
             userState.updateTmpMap(chatId.toString(), UserParam.CALLBACK_DATA, callback.data)
-
-            responseMessage =
-                stepBuilderMap[currentStep.stepType.name]?.build(currentStep, chatId.toString())!!
-
+            responseMessage = stepBuilderMap[currentStep.stepType.name]?.build(currentStep, chatId.toString())!!
             userState.setCurrentStep(chatId.toString(), State(currentStep.id, responseMessage.text))
         }
         execute(responseMessage)
@@ -157,4 +194,130 @@ class KotlingradBot : TelegramLongPollingBot() {
         execute(editMessageText)
         editMessageText.parseMode = ParseMode.HTML
     }
+
+    // client message handler
+    private fun clientUpdateHandler(update: Update) {
+        if (update.hasMessage()) {
+            val message = update.message
+            val chatId = message.chatId
+            var buttons: List<List<String>> = listOf(ArrayList<String>())
+            val stage: Pair<List<List<String>>, String>
+            // TODO попросить указать телефон
+
+            val responseText = if (message.hasText()) {
+                val messageText = message.text
+                val currentUser = message.from
+                val serviceProvidedName = messageText.split(",")
+                if (serviceProvidedName.size == 1) {
+                    when {
+                        messageText == "/start" -> {
+                            stage = processService.startStage("/start", currentUser)
+                            buttons = stage.first
+                            "Добро пожаловать, ${currentUser.firstName}!"
+                        }
+
+                        messageText == "О боте" -> {
+                            buttons = ProcessService.getFirstStageClientButtons()
+                            aboutBotForClient
+                        }
+
+                        messageText == "О мастере" -> {
+                            buttons = ProcessService.getFirstStageClientButtons()
+                            aboutMaster
+                        }
+
+                        messageText == "Список услуг" -> {
+                            buttons = processService.startStage("/start", currentUser).first
+                            processService.getServiceListMessage()
+                        }
+
+                        messageText == "Записаться" -> {
+                            buttons = processService.getServiceListButtons("Список услуг", currentUser.id)
+                            "Выберите услугу из списка"
+                        }
+
+                        messageText == "Назад" -> {
+                            val response = processService.getPreviousListButtons(currentUser)
+                            buttons = response.first
+                            response.second
+                        }
+
+                        messageText in serviceProvidedService.getServiceProvidedNames() -> {
+                            // TODO проверить доступные дни, у которых есть свободные часы для записи
+                            buttons = processService.getFreeDaysAsButtons("Выбрана услуга", currentUser.id, messageText)
+
+                            // buttons = processService.getServiceListButtons("Список услуг", currentUser.id)
+                            "Выберите удобную дату"
+                        }
+
+                        messageText.contains(Regex("""\d{2}:\d{2}""")) -> {
+                            val result = processService.executeRecord(currentUser, messageText)
+                            buttons = result.first
+                            result.second
+                        }
+
+                        messageText.contains(Regex("""\d{2}\s\D{3,8}\s\d{4},\s\D{2}""")) -> {
+
+                            val formatter = DateTimeFormatterBuilder()
+                                .parseCaseInsensitive()
+                                .append(DateTimeFormatter.ofPattern("dd MMMM yyyy, EE"))
+                                .toFormatter(Locale("Ru"))
+
+                            val parsed = formatter.parse(messageText)
+
+                            buttons = Utils.getButtonsList(
+                                serviceRegistrationService.getUserShedule(
+                                    currentUser.id,
+                                    LocalDate.of(
+                                        parsed.get(ChronoField.YEAR),
+                                        parsed.get(ChronoField.MONTH_OF_YEAR),
+                                        parsed.get(ChronoField.DAY_OF_MONTH)
+                                    )
+                                )
+                            )
+                            "Выбрана дата $messageText"
+                        }
+
+                        messageText.startsWith("${Icon.TIME.value()} Мое Расписание") -> {
+                            buttons = Utils.getButtonsList(Utils.getWeeksDates())
+                            "Выберите дату на текущей неделе..." // обработка нажатия кнопки
+                        }
+
+                        else -> "Вы написали: $messageText"
+                    }
+                } else {
+                    // TODO секция для дней
+                    buttons = processService.saveScheduleRecordWithDate("Выбрана дата", currentUser.id, messageText)
+                    "Выберите удобное время"
+                }
+            } else {
+                "Я понимаю только текст"
+            }
+
+            sendNotification(chatId, responseText, buttons)
+        }
+    }
+
+    private fun sendNotification(chatId: Long, responseText: String, buttons: List<List<String>>) {
+        val responseMessage = SendMessage(chatId.toString(), responseText)
+        if (buttons.isNotEmpty()) {
+            responseMessage.enableMarkdown(true)
+            responseMessage.replyMarkup = getReplyMarkup(buttons)
+            execute(responseMessage)
+        }
+    }
+
+    private fun getReplyMarkup(allButtons: List<List<String>>): ReplyKeyboardMarkup {
+        val markup = ReplyKeyboardMarkup()
+        markup.keyboard = allButtons.map { rowButtons ->
+            val row = KeyboardRow()
+            rowButtons.forEach { rowButton -> row.add(rowButton) }
+            row
+        }
+        return markup
+    }
+
+    private fun defaultUser() = Person(-1, "Unknown user", "no phone", PersonRole.CLIENT, "no name")
+    private fun newUserFromMessage(message: Message) =
+        Person(0, message.from.firstName, "", PersonRole.CLIENT, message.from.firstName)
 }

@@ -10,7 +10,7 @@ import ru.sber.kotlinschool.telegram.entity.Step
 @Component("DATE_TIME_CALC")
 class DateTimeCalculationStepBuilder : StepBuilder() {
 
-    @Value("\${admin.startWorkinHour}")
+    @Value("\${admin.startWorkingHour}")
     private val  start: String = ""
 
     @Value("\${admin.endWorkingHour}")

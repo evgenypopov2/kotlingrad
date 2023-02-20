@@ -1,4 +1,4 @@
-package ru.sber.kotlinschool.telegram.stepActions
+package ru.sber.kotlinschool.telegram.stepBuilder
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -6,25 +6,24 @@ import org.springframework.stereotype.Component
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton
-import ru.sber.kotlinschool.data.service.ServicePerson
-import ru.sber.kotlinschool.data.service.ServiceSchedule
+import ru.sber.kotlinschool.data.service.PersonService
+import ru.sber.kotlinschool.data.service.ServiceRegistrationService
 import ru.sber.kotlinschool.telegram.entity.Step
 import ru.sber.kotlinschool.telegram.entity.UserParam
 import ru.sber.kotlinschool.telegram.service.UserState
-import ru.sber.kotlinschool.telegram.stepBuilder.StepBuilder
 import java.time.LocalTime
 
 
 
 @Component("ADMIN_DAY_SCHEDULE")
-class DayScheduleStepBuilder(@Autowired val scheduleService: ServiceSchedule,
-                             @Autowired val personService: ServicePerson,
+class DayScheduleStepBuilder(@Autowired val registrationService: ServiceRegistrationService,
+                             @Autowired val personService: PersonService,
                              @Autowired val userState: UserState
 ) : StepBuilder() {
 
     //private val logger = LoggerFactory.getLogger(DayScheduleStepBuilder::class.java)
 
-    @Value("\${admin.startWorkinHour}")
+    @Value("\${admin.startWorkingHour}")
     private val  start: String = ""
 
     @Value("\${admin.endWorkingHour}")
@@ -32,11 +31,11 @@ class DayScheduleStepBuilder(@Autowired val scheduleService: ServiceSchedule,
 
     override fun build(currentStep: Step, chatId: String): SendMessage {
 
-        val selectedDate = scheduleService.getSelectedDate(userState.getTmpParam(chatId, UserParam.CALLBACK_DATA))
+        val selectedDate = registrationService.getSelectedDate(userState.getTmpParam(chatId, UserParam.CALLBACK_DATA))
 
-        val list = scheduleService.getDaySchedule(
+        val list = registrationService.getDaySchedule(
             selectedDate,
-            personService.findPersonById(chatId.toLong()).get(),
+            personService.findById(chatId.toLong()).get(),
             LocalTime.of(start.toInt(), 0, 0, 0),
             LocalTime.of(end.toInt(), 0, 0, 0)
         )

@@ -4,7 +4,7 @@ import javax.persistence.*
 
 @Entity
 @Table(uniqueConstraints = arrayOf(
-    UniqueConstraint(name = "service_name_un", columnNames = arrayOf("name", "executor_telegram_id"))
+    UniqueConstraint(name = "service_name_un", columnNames = arrayOf("name", "executor_id"))
 ))
 class ServiceProvided(
     @Id
@@ -18,6 +18,7 @@ class ServiceProvided(
     var capacity: Int = 1,
     @Column(nullable = false, columnDefinition = "bigint default 0")
     val price: Int = 0,
-    @OneToOne(cascade = [CascadeType.ALL])
+    @ManyToOne
+    @JoinColumn(name = "executor_id")
     val executor: Person
 )

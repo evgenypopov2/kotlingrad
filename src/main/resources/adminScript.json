@@ -89,7 +89,7 @@
     {
       "id": 21,
       "title": "Вернуться в главное меню",
-      "messageForUser": "Вернутся в главное меню",
+      "messageForUser": "Вернуться в главное меню",
       "nextStepId": [2, 30, 40],
       "stepType": "NEXT",
       "configParams": ["CLEAR_HISTORY"]
