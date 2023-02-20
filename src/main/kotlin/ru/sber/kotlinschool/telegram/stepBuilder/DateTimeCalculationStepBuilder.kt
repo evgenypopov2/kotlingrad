@@ -17,6 +17,7 @@ class DateTimeCalculationStepBuilder : StepBuilder() {
     private val  end: String = ""
 
     override fun build(currentStep: Step, chatId: String): SendMessage {
+
         val responseMessage = SendMessage(chatId, currentStep.messageForUser)
         responseMessage.enableMarkdown(true)
 

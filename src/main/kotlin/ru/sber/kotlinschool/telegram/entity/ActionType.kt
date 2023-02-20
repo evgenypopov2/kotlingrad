@@ -12,5 +12,6 @@ enum class StepType {
     CLIENT_LIST,
     USER_TGM_LINK,
     PROFIT_CALC,
-    PERIOD
+    PERIOD,
+    ADMIN_DAY_SCHEDULE
 }

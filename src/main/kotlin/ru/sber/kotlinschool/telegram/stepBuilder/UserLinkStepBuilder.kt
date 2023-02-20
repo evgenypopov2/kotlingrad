@@ -18,7 +18,7 @@ class UserLinkStepBuilder : StepBuilder() {
     override fun build(currentStep: Step, chatId: String): SendMessage {
         val userMessage = getUserMessage(
             chatId,
-            Person(1L, "Лея Органа", "545345", "@leyaOrgano", PersonRole.CLIENT),
+            Person(1L, "Лея Органа", "545345", PersonRole.CLIENT, "@leyaOrgano"),
             currentStep.configParams
         )
 
@@ -44,7 +44,7 @@ class UserLinkStepBuilder : StepBuilder() {
                 "\n" +
                 "Сообщение:\n" +
                 "${message}?\n" +
-                "\n";
+                "\n"
     }
 
     fun getMessageByType(chatId:String,person: Person, type: String): String {

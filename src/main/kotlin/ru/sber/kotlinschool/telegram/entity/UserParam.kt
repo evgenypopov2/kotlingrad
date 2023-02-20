@@ -5,5 +5,6 @@ enum class UserParam {
     DATE_SCHEDULE,
     TIME_SCHEDULE,
     USER_FIO,
-    PERIOD
+    PERIOD,
+    CALLBACK_DATA
 }
