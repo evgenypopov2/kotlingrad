@@ -16,7 +16,6 @@ interface ServiceRegistrationRepository: JpaRepository<ServiceRegistration, Long
     @Query("select sr from ServiceRegistration sr where sr.date = ?1 and sr.executor.id = ?2 order by sr.date, sr.time")
     fun findServiceRegistrationByDate(date: LocalDate, executorId: Long): List<ServiceRegistration>
 
-
     @Query("select ss from ServiceRegistration ss where ss.date = :dt")
     fun findServiceScheduleByDate(@Param("dt") date: LocalDate): List<ServiceRegistration>
 
@@ -27,4 +26,6 @@ interface ServiceRegistrationRepository: JpaRepository<ServiceRegistration, Long
     @Query("select sr from ServiceRegistration sr where sr.date = :dt and sr.client.id = :userId")
     fun getRegistrationsByUserAndDate(@Param("userId") userId: Long, @Param("dt") date: LocalDate): List<ServiceRegistration>
 
+    @Query("select sr from ServiceRegistration sr where sr.executor.id = :id and sr.isVisited = true")
+    fun getFinishedSchedule(@Param("id") id: Long) : List<ServiceRegistration>
 }

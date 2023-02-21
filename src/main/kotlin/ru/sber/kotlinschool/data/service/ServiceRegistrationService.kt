@@ -3,6 +3,7 @@ package ru.sber.kotlinschool.data.service
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import ru.sber.kotlinschool.data.entity.Person
+import ru.sber.kotlinschool.data.entity.ServiceProvided
 import ru.sber.kotlinschool.data.entity.ServiceRegistration
 import ru.sber.kotlinschool.data.repository.ServiceRegistrationRepository
 import java.time.DayOfWeek
@@ -12,6 +13,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.*
+import java.util.stream.Collectors
 
 @Service
 class ServiceRegistrationService(
@@ -136,7 +138,7 @@ class ServiceRegistrationService(
     }
 
     fun findServiceScheduleByDate(date: LocalDate) = serviceRegistrationRepository.findServiceScheduleByDate(date)
-    fun getUserShedule(id: Long, date: LocalDate): List<String> {
+    fun getUserSchedule(id: Long, date: LocalDate): List<String> {
         val result: ArrayList<String> = ArrayList()
         for (srvReg in getRegistrationsByUserAndDate(id, date)) {// 10-00 Семенов Семен, стрижка, цена
             result.add("${srvReg.time} ${srvReg.client.fio} ${srvReg.service.name} ${srvReg.service.price / 100}")
@@ -178,6 +180,19 @@ class ServiceRegistrationService(
         return freeDaysHours
     }
 
+    fun getBusyDays(executorId: Long): MutableMap<String, MutableList<Int>> {
+        val allRecords =
+            serviceRegistrationRepository.findAll().filter {
+                it.executor.id == executorId
+                        && !it.isVisited
+                        && it.date.isAfter(LocalDate.now().minusDays(1))
+            }
+
+        return allRecords.groupBy { it.date.format(FORMATTER) }.mapValues { entry ->
+                entry.value.map { it.time.hour }.toMutableList()
+            }.toMutableMap()
+    }
+
     fun getScheduleTemplate(): MutableMap<String, MutableList<Int>> {
         var date = LocalDate.now()
         val firstKey = date.format(FORMATTER)
@@ -188,7 +203,7 @@ class ServiceRegistrationService(
         }
         for (i in 0..6) {
             val dateForButton = date.format(FORMATTER)
-            scheduleTemplate.set(dateForButton, hours.toMutableList())
+            scheduleTemplate[dateForButton] = hours.toMutableList()
             date = date.plusDays(1)
         }
         val time = LocalTime.now().hour.plus(1)
@@ -200,11 +215,22 @@ class ServiceRegistrationService(
         for (i in todayStartHour until endHour) {
             todayHours.add(i)
         }
-        scheduleTemplate.set(firstKey, todayHours)
+        scheduleTemplate[firstKey] = todayHours
 
         return scheduleTemplate
     }
 
     fun save(record: ServiceRegistration) = serviceRegistrationRepository.save(record)
 
+    fun getRevenueByFinishedSchedule(userId: Long): Long {
+        val finishedSchedule = serviceRegistrationRepository.getFinishedSchedule(userId)
+        val priceList: Map<String, Int> = serviceProvidedService.getServiceProvidedList().stream()
+            .collect(Collectors.toMap(ServiceProvided::name, ServiceProvided::price))
+        var revenue = 0L
+        finishedSchedule.forEach { revenue += priceList[it.service.name]!! }
+
+        return revenue
+    }
+
+    fun getMySchedule(): List<ServiceRegistration> = serviceRegistrationRepository.findAll()
 }

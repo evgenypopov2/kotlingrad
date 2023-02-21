@@ -27,8 +27,8 @@ class ProcessService(
     fun startStage(stepName: String, user: User): Pair<List<List<String>>, String> {
         userHistory.remove(user.id)
         val userFlow = UserFlow()
-        userFlow.steps.set(stepName, "")
-        userHistory.set(user.id, userFlow)
+        userFlow.steps[stepName] = ""
+        userHistory[user.id] = userFlow
         var currentUser = personRepository.findById(user.id).orElse(null)
 
         if (currentUser == null) {
@@ -53,13 +53,13 @@ class ProcessService(
     }
 
     fun getServiceListButtons(stepName: String, userId: Long): List<List<String>> {
-        val userFlow = userHistory.get(userId)
-        userFlow!!.steps.set(stepName, "")
-        userHistory.set(userId, userFlow)
-        val serviceProvideds = serviceProvidedService.getServiceProvidedList()
+        val userFlow = userHistory[userId]
+        userFlow!!.steps[stepName] = ""
+        userHistory[userId] = userFlow
+        val servicesProvided = serviceProvidedService.getServiceProvidedList()
         val elements = ArrayList<String>()
         val buttons: MutableList<List<String>> = mutableListOf(elements)
-        serviceProvideds.forEach {
+        servicesProvided.forEach {
             buttons.add(arrayListOf(it.name))
         }
         buttons.add(arrayListOf("Назад"))
@@ -67,9 +67,8 @@ class ProcessService(
     }
 
     fun getServiceListMessage(): String {
-        val serviceProvideds = serviceProvidedService.getServiceProvidedList()
         val stringBuilder = StringBuilder()
-        serviceProvideds.forEach {
+        serviceProvidedService.getServiceProvidedList().forEach {
             stringBuilder.append(it.name + ", " + it.price + " руб\n")
         }
         return stringBuilder.toString()
@@ -99,19 +98,41 @@ class ProcessService(
                     "Выберите удобную дату"
                 )
             }
+            "Мое расписание" -> {
+                response = Pair(
+                    getBusyDaysAsButtons(user.id, "Мое расписание"),
+                    "Выберите дату"
+                )
+            }
         }
 
         return response
     }
 
     fun getFreeDaysAsButtons(stepName: String, userId: Long, serviceProvided: String): List<List<String>> {
-        val userFlow = userHistory.get(userId)
-        userFlow!!.steps.set(stepName, serviceProvided)
-        userHistory.set(userId, userFlow)
+        val userFlow = userHistory[userId]
+        userFlow!!.steps[stepName] = serviceProvided
+        userHistory[userId] = userFlow
         val freeDaysHours = serviceRegistrationService.getFreeDays(serviceProvided)
         val buttons: MutableList<List<String>> = mutableListOf(ArrayList<String>())
         freeDaysHours.forEach {
-            buttons.add(arrayListOf<String>(it.key))
+            buttons.add(arrayListOf(it.key))
+        }
+        buttons.add(arrayListOf("Назад"))
+
+        return buttons
+    }
+
+    fun getBusyDaysAsButtons(userId: Long, stepName: String): List<List<String>> {
+        val userFlow = userHistory[userId]
+        userFlow!!.steps[stepName] = ""
+        userHistory[userId] = userFlow
+        val busyDaysHours = serviceRegistrationService.getBusyDays(userId)
+        val buttons: MutableList<List<String>> = mutableListOf(ArrayList<String>())
+        busyDaysHours.forEach {
+            var hours: String = ""
+            it.value.sorted().forEach { hours += it.toString() + ":00 " }
+            buttons.add(arrayListOf("${it.key}\n$hours"))
         }
         buttons.add(arrayListOf("Назад"))
 
@@ -119,18 +140,39 @@ class ProcessService(
     }
 
     fun saveScheduleRecordWithDate(stepName: String, userId: Long, selectedDate: String): List<List<String>> {
-        val userFlow = userHistory.get(userId)
-        val (keyLast, valueLast) = userFlow!!.steps.entries.stream().skip((userFlow.steps.size - 1).toLong())
-            .findFirst().get()
-        val serviceProvided = userFlow.steps[keyLast] ?: ""
-        userFlow.steps.set(stepName, selectedDate)
-        userHistory.set(userId, userFlow)
-        val freeDaysHours = serviceRegistrationService.getFreeDays(serviceProvided)
         val buttons: MutableList<List<String>> = mutableListOf(ArrayList<String>())
-        freeDaysHours[selectedDate]?.forEach {
-            buttons.add(arrayListOf<String>("$it:00"))
+        val userFlow = userHistory[userId]
+        val userRole = personRepository.findById(userId).get().role
+        if (userRole == PersonRole.CLIENT) {
+            val (keyLast, valueLast) = userFlow!!.steps.entries.stream().skip((userFlow.steps.size - 1).toLong())
+                .findFirst().get()
+            val serviceProvided = userFlow.steps[keyLast] ?: ""
+
+            val freeDaysHours = serviceRegistrationService.getFreeDays(serviceProvided)
+            freeDaysHours[selectedDate]?.forEach {
+                buttons.add(arrayListOf("$it:00"))
+            }
+        } else {
+            val allRecords =
+                serviceRegistrationService.getMySchedule().filter {
+                    it.executor.id == userId
+                            && !it.isVisited
+                            && it.date.isAfter(LocalDate.now().minusDays(1))
+                }
+                    .toCollection(ArrayList())
+            allRecords.forEach {
+                buttons.add(
+                    arrayListOf(
+                        "${it.time.hour}:00, ${it.client.fio ?: it.client.firstName}, ${it.service.name}, ${it.service.price}"
+                    )
+                )
+            }
         }
+
         buttons.add(arrayListOf("Назад"))
+
+        userFlow!!.steps[stepName] = selectedDate
+        userHistory[userId] = userFlow
 
         return buttons
     }
@@ -143,7 +185,7 @@ class ProcessService(
     }
 
     fun doRecord(user: User, hour: String): String {
-        val userFlow = userHistory.get(user.id)
+        val userFlow = userHistory[user.id]
         val (keyLast, valueLast) = userFlow!!.steps.entries.stream().skip((userFlow.steps.size - 1).toLong())
             .findFirst().get()
         val dateRecord = valueLast
@@ -172,16 +214,36 @@ class ProcessService(
         return message
     }
 
+    fun getRevenue(stepName: String, user: User): Pair<List<List<String>>, String> {
+        val revenue = serviceRegistrationService.getRevenueByFinishedSchedule(user.id)
+        val resultMessage = "Вы заработали со дня основания : $revenue руб"
+        val buttons = startStage("/start", user).first
+
+        return Pair(buttons, resultMessage)
+    }
+
+    fun getActionsForScheduleRecord(
+        stepName: String,
+        user: User,
+        recordAsString: String
+    ): Pair<List<List<String>>, String> {
+        val userFlow = userHistory.get(user.id)
+        userFlow!!.steps[stepName] = recordAsString
+        userHistory[user.id] = userFlow
+        val resultMessage = "В разработке"
+        val buttons = startStage("/start", user).first
+        return Pair(buttons, resultMessage)
+    }
+
     companion object {
         fun getFirstStageClientButtons() = listOf(
             listOf("О боте", "О мастере"),
-            listOf("Список услуг", "Записаться"),
-            listOf("Выход")
+            listOf("Список услуг", "Записаться")
         )
 
         fun getFirstStageAdminButtons() = listOf(
-            listOf("Мое Расписание", "Список клиентов"),
-            listOf("Рассчитать выручку", "Выход")
+            listOf("Мое расписание", "Список клиентов"),
+            listOf("Рассчитать выручку")
         )
     }
 }

@@ -1,5 +1,6 @@
 package ru.sber.kotlinschool.telegram.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -20,7 +21,6 @@ import ru.sber.kotlinschool.data.entity.PersonRole
 import ru.sber.kotlinschool.data.service.PersonService
 import ru.sber.kotlinschool.data.service.ServiceProvidedService
 import ru.sber.kotlinschool.data.service.ServiceRegistrationService
-import ru.sber.kotlinschool.telegram.const.Icon
 import ru.sber.kotlinschool.telegram.entity.Step
 import ru.sber.kotlinschool.telegram.entity.UserParam
 import ru.sber.kotlinschool.telegram.stepAction.ActionExecutor
@@ -40,16 +40,18 @@ class KotlingradBot(
     private val serviceRegistrationService: ServiceRegistrationService
 ) : TelegramLongPollingBot() {
 
+    private val logger = LoggerFactory.getLogger(KotlingradBot::class.java)
+
     @Value("\${bot.name}")
     private val botName: String = ""
 
     @Value("\${bot.token}")
     private val token: String = ""
 
-    @Value("\${bot.about.for-client}")
+    @Value("#{propertiesFileMapping['bot.about.for-client']}")
     private val aboutBotForClient: String = ""
 
-    @Value("\${bot.about.master}")
+    @Value("#{propertiesFileMapping['bot.about.master']}")
     private val aboutMaster: String = ""
 
     @Autowired
@@ -65,8 +67,8 @@ class KotlingradBot(
     private val actionExecutorMap: Map<String, ActionExecutor> = HashMap()
 
     private val updateHandlers: Map<String, (Update) -> Unit> = mapOf(
-        Pair(PersonRole.ADMIN.name) { update: Update -> adminUpdateHandler(update) },
-        Pair(PersonRole.CLIENT.name) { update: Update -> clientUpdateHandler(update) },
+        Pair(PersonRole.ADMIN.name) { update: Update -> guzalUpdateHandler(update) },
+        Pair(PersonRole.CLIENT.name) { update: Update -> alexeyUpdateHandler(update) },
    )
 
     override fun getBotUsername(): String = botName
@@ -75,7 +77,8 @@ class KotlingradBot(
 
     override fun onUpdateReceived(update: Update?) {
         if (update != null) {
-            updateHandlers[determineUserRole(update).name]?.invoke(update)
+            alexeyUpdateHandler(update)
+            //updateHandlers[determineUserRole(update).name]?.invoke(update)
         }
     }
 
@@ -94,7 +97,7 @@ class KotlingradBot(
             user.role
         }
 
-    private fun adminUpdateHandler(update: Update) {
+    private fun guzalUpdateHandler(update: Update) {
         if (update.hasMessage()) {
             executeResponseForMessage(update)
         } else if (update.hasCallbackQuery()) {
@@ -196,24 +199,24 @@ class KotlingradBot(
     }
 
     // client message handler
-    private fun clientUpdateHandler(update: Update) {
+    private fun alexeyUpdateHandler(update: Update) {
         if (update.hasMessage()) {
             val message = update.message
             val chatId = message.chatId
             var buttons: List<List<String>> = listOf(ArrayList<String>())
-            val stage: Pair<List<List<String>>, String>
             // TODO попросить указать телефон
 
             val responseText = if (message.hasText()) {
                 val messageText = message.text
                 val currentUser = message.from
+                logger.info("Request $messageText from userId ${currentUser.id} ${currentUser.firstName}")
                 val serviceProvidedName = messageText.split(",")
                 if (serviceProvidedName.size == 1) {
                     when {
                         messageText == "/start" -> {
-                            stage = processService.startStage("/start", currentUser)
-                            buttons = stage.first
-                            "Добро пожаловать, ${currentUser.firstName}!"
+                            val result = processService.startStage("/start", currentUser)
+                            buttons = result.first
+                            result.second
                         }
 
                         messageText == "О боте" -> {
@@ -266,7 +269,7 @@ class KotlingradBot(
                             val parsed = formatter.parse(messageText)
 
                             buttons = Utils.getButtonsList(
-                                serviceRegistrationService.getUserShedule(
+                                serviceRegistrationService.getUserSchedule(
                                     currentUser.id,
                                     LocalDate.of(
                                         parsed.get(ChronoField.YEAR),
@@ -278,17 +281,33 @@ class KotlingradBot(
                             "Выбрана дата $messageText"
                         }
 
-                        messageText.startsWith("${Icon.TIME.value()} Мое Расписание") -> {
-                            buttons = Utils.getButtonsList(Utils.getWeeksDates())
-                            "Выберите дату на текущей неделе..." // обработка нажатия кнопки
+                        messageText.startsWith("Мое расписание") -> {
+                            buttons = processService.getBusyDaysAsButtons(currentUser.id, messageText)
+                            "Выберите дату"
+                        }
+
+                        messageText.startsWith("Список клиентов") -> {
+                            val result = processService.startStage("/start", currentUser)
+                            "В разработке"
+                        }
+
+                        messageText.startsWith("Рассчитать выручку") -> {
+                            val result = processService.getRevenue("revenue", currentUser)
+                            buttons = result.first
+                            result.second
                         }
 
                         else -> "Вы написали: $messageText"
                     }
-                } else {
-                    // TODO секция для дней
+                } else if (serviceProvidedName.size == 2) {
+                    // секция для дней
                     buttons = processService.saveScheduleRecordWithDate("Выбрана дата", currentUser.id, messageText)
-                    "Выберите удобное время"
+                    "Выберите время"
+                } else {
+                    // секция для записей в расписании админа
+                    val result = processService.getActionsForScheduleRecord("Выбрана запись", currentUser, messageText)
+                    buttons = result.first
+                    result.second
                 }
             } else {
                 "Я понимаю только текст"
